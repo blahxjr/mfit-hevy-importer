@@ -1,7 +1,7 @@
 # ADR-003: Contratos da API Hevy
 
 ## Status
-Draft (será atualizado após Fase 0)
+Accepted — validado na Fase 0
 
 ## Context
 
@@ -11,11 +11,22 @@ A API Hevy é crítica para o projeto, pois será o destino final de todas as im
 - Limites de rate limit e tratamento de erros
 - Estrutura real das respostas
 
-Referência oficial: https://www.hevyapp.com/api/docs
+Referência oficial: https://api.hevyapp.com/docs/
 
 ## Decision
 
 Fase 0 executa validação estruturada da API Hevy usando `scripts/prova_hevy_api.py`.
+
+### Achados da prova autenticada
+
+- Os quatro `GET` testados retornaram `200`.
+- A autenticação é realizada pelo header `api-key`; `Authorization: Bearer` retornou `401 Invalid or expired token`.
+- Coleções são paginadas pelos campos `page` e `page_count`, e não pelo envelope hipotético `data`.
+- Os itens são retornados em `exercise_templates`, `routine_folders` e `routines`.
+- `exercise_template` usa `type`, `primary_muscle_group`, `secondary_muscle_groups`, `equipment` (string) e `is_custom`.
+- `routine_folder` usa `id` numérico e `title`; `routine` usa `title` e `folder_id` numérico.
+- Não houve resposta `429` nas quatro leituras. O endpoint `GET /v1/user/info` respondeu `200` com corpo vazio.
+- O schema sanitizado está em `docs/schemas/hevy-api-real.json`; os relatórios da execução estão em `docs/flows/hevy-api-prova-01.*`.
 
 ### Endpoints Validados
 

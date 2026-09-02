@@ -1,0 +1,65 @@
+{
+  "metadata": {
+    "source": "Prova de API autenticada — GET endpoints",
+    "base_url": "https://api.hevyapp.com",
+    "authentication": "api-key header",
+    "sanitized": true,
+    "observed_at": "2026-09-01"
+  },
+  "GET /v1/exercise_templates": {
+    "status_code": 200,
+    "response": {
+      "page": "integer",
+      "page_count": "integer",
+      "exercise_templates": [
+        {
+          "id": "string",
+          "title": "string",
+          "type": "string",
+          "primary_muscle_group": "string",
+          "secondary_muscle_groups": ["string"],
+          "equipment": "string",
+          "is_custom": "boolean"
+        }
+      ]
+    }
+  },
+  "GET /v1/routine_folders": {
+    "status_code": 200,
+    "response": {
+      "page": "integer",
+      "page_count": "integer",
+      "routine_folders": [
+        {
+          "id": "integer",
+          "title": "string",
+          "index": "integer",
+          "created_at": "string",
+          "updated_at": "string"
+        }
+      ]
+    }
+  },
+  "GET /v1/routines": {
+    "status_code": 200,
+    "response": {
+      "page": "integer",
+      "page_count": "integer",
+      "routines": [
+        {
+          "id": "string",
+          "title": "string",
+          "folder_id": "integer",
+          "exercises": ["object"],
+          "created_at": "string",
+          "updated_at": "string"
+        }
+      ]
+    }
+  },
+  "GET /v1/user/info": {
+    "status_code": 200,
+    "response": {},
+    "note": "O endpoint retornou corpo vazio na prova; não é necessário para o importador."
+  }
+}

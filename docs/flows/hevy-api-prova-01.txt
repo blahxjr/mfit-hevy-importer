@@ -1,0 +1,83 @@
+PROVA DE CONCEITO — API HEVY
+======================================================================
+
+Endpoint: GET /v1/exercise_templates
+Status: 200 ✅
+Items: 100
+Headers: {'content-type': 'application/json; charset=utf-8'}
+Amostra:
+{
+  "page": "int",
+  "page_count": "int",
+  "exercise_templates": [
+    {
+      "id": "str",
+      "title": "str",
+      "type": "str",
+      "primary_muscle_group": "str",
+      "secondary_muscle_groups": "list",
+      "equipment": "str",
+      "is_custom": "bool"
+    }
+  ]
+}...
+
+----------------------------------------------------------------------
+
+Endpoint: GET /v1/routine_folders
+Status: 200 ✅
+Items: 2
+Headers: {'content-type': 'application/json; charset=utf-8'}
+Amostra:
+{
+  "page": "int",
+  "page_count": "int",
+  "routine_folders": [
+    {
+      "id": "int",
+      "index": "int",
+      "title": "str",
+      "updated_at": "str",
+      "created_at": "str"
+    }
+  ]
+}...
+
+----------------------------------------------------------------------
+
+Endpoint: GET /v1/routines
+Status: 200 ✅
+Items: 9
+Headers: {'content-type': 'application/json; charset=utf-8'}
+Amostra:
+{
+  "page": "int",
+  "page_count": "int",
+  "routines": [
+    {
+      "id": "str",
+      "title": "str",
+      "folder_id": "int",
+      "updated_at": "str",
+      "created_at": "str",
+      "exercises": "list"
+    }
+  ]
+}...
+
+----------------------------------------------------------------------
+
+Endpoint: GET /v1/user/info
+Status: 200 ✅
+Headers: {'content-type': 'application/json; charset=utf-8'}
+Amostra:
+{
+  "data": {
+    "id": "str",
+    "name": "str",
+    "url": "str"
+  }
+}...
+
+----------------------------------------------------------------------
+

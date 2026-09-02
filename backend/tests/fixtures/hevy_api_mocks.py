@@ -5,52 +5,72 @@ Responses capturadas durante Fase 0 para testes sem chamar API real
 
 # Exemplo de response de exercise_templates
 MOCK_EXERCISE_TEMPLATES = {
-    "data": [
+    "page": 1,
+    "page_count": 1,
+    "exercise_templates": [
         {
             "id": "template-001",
             "title": "Supino Reto",
-            "category": "strength",
-            "muscle_groups": ["chest", "triceps", "shoulders"],
-            "equipment": ["barbell", "bench"],
+            "type": "strength",
+            "primary_muscle_group": "chest",
+            "secondary_muscle_groups": ["triceps", "shoulders"],
+            "equipment": "barbell",
+            "is_custom": False,
         },
         {
             "id": "template-002",
             "title": "Agachamento",
-            "category": "strength",
-            "muscle_groups": ["quadriceps", "glutes", "hamstrings"],
-            "equipment": ["barbell", "rack"],
+            "type": "strength",
+            "primary_muscle_group": "quadriceps",
+            "secondary_muscle_groups": ["glutes", "hamstrings"],
+            "equipment": "barbell",
+            "is_custom": False,
         },
         {
             "id": "template-003",
             "title": "Rosca Direta",
-            "category": "strength",
-            "muscle_groups": ["biceps"],
-            "equipment": ["barbell"],
+            "type": "strength",
+            "primary_muscle_group": "biceps",
+            "secondary_muscle_groups": [],
+            "equipment": "barbell",
+            "is_custom": False,
         },
     ]
 }
 
 # Exemplo de response de routine_folders
 MOCK_ROUTINE_FOLDERS = {
-    "data": [
+    "page": 1,
+    "page_count": 1,
+    "routine_folders": [
         {
-            "id": "folder-001",
-            "name": "Treinos de Força",
+            "id": 1,
+            "title": "Treinos de Força",
+            "index": 0,
+            "created_at": "2026-09-01T00:00:00Z",
+            "updated_at": "2026-09-01T00:00:00Z",
         },
         {
-            "id": "folder-002",
-            "name": "Treinos de Hipertrofia",
+            "id": 2,
+            "title": "Treinos de Hipertrofia",
+            "index": 1,
+            "created_at": "2026-09-01T00:00:00Z",
+            "updated_at": "2026-09-01T00:00:00Z",
         },
     ]
 }
 
 # Exemplo de response de routines
 MOCK_ROUTINES = {
-    "data": [
+    "page": 1,
+    "page_count": 1,
+    "routines": [
         {
             "id": "routine-001",
-            "name": "Rotina A - Peito e Tríceps",
-            "folder_id": "folder-001",
+            "title": "Rotina A - Peito e Tríceps",
+            "folder_id": 1,
+            "created_at": "2026-09-01T00:00:00Z",
+            "updated_at": "2026-09-01T00:00:00Z",
             "exercises": [
                 {
                     "order": 1,

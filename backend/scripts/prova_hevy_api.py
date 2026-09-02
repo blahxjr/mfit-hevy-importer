@@ -32,6 +32,17 @@ TIMEOUT = int(os.getenv("HEVY_API_TIMEOUT", "30"))
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 
+def schema_snapshot(value: Any, depth: int = 0) -> Any:
+    """Retorna campos e tipos de uma resposta sem persistir valores da conta."""
+    if depth >= 3:
+        return type(value).__name__
+    if isinstance(value, dict):
+        return {key: schema_snapshot(item, depth + 1) for key, item in value.items()}
+    if isinstance(value, list):
+        return [schema_snapshot(value[0], depth + 1)] if value else []
+    return type(value).__name__
+
+
 @dataclass
 class ApiProvaResult:
     """Resultado de uma chamada à API"""
@@ -56,7 +67,7 @@ class HevyApiProver:
     def __init__(self):
         self.base_url = BASE_URL
         self.headers = {
-            "Authorization": f"Bearer {API_KEY}",
+            "api-key": API_KEY,
             "Content-Type": "application/json",
         }
         self.results = []
@@ -107,16 +118,21 @@ class HevyApiProver:
                 data = response.json()
                 if isinstance(data, list):
                     item_count = len(data)
-                    sample_item = data[0] if item_count > 0 else None
+                    sample_item = schema_snapshot(data)
                 elif isinstance(data, dict):
                     # Tentar entender estrutura
                     if "data" in data:
                         items = data["data"]
                         if isinstance(items, list):
                             item_count = len(items)
-                            sample_item = items[0] if item_count > 0 else None
                     else:
-                        sample_item = data
+                        collection = next(
+                            (value for value in data.values() if isinstance(value, list)),
+                            None,
+                        )
+                        if collection is not None:
+                            item_count = len(collection)
+                    sample_item = schema_snapshot(data)
             except json.JSONDecodeError:
                 pass
 
@@ -221,7 +237,7 @@ class HevyApiProver:
         # 4. User Profile (GET) - Opcional, ajuda a validar auth
         await self.test_endpoint(
             "GET",
-            "/v1/user",
+            "/v1/user/info",
             expected_status=200,
             description="Valida autenticação e obtém dados do usuário (opcional)",
         )
@@ -255,7 +271,8 @@ class HevyApiProver:
 
     def salvar_resultados(self, output_dir: str = "docs/flows"):
         """Salva resultados em JSON para documentação"""
-        output_path = Path(output_dir) / "hevy-api-prova-01.json"
+        project_root = Path(__file__).resolve().parents[2]
+        output_path = project_root / output_dir / "hevy-api-prova-01.json"
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
         # Convertendo resultados para dicts
@@ -278,7 +295,7 @@ class HevyApiProver:
         print(f"\n✅ Resultados salvos em: {output_path}")
 
         # Também salva um resumo em TXT
-        txt_path = Path(output_dir) / "hevy-api-prova-01.txt"
+        txt_path = output_path.with_suffix(".txt")
         with open(txt_path, "w", encoding="utf-8") as f:
             f.write("PROVA DE CONCEITO — API HEVY\n")
             f.write("=" * 70 + "\n\n")

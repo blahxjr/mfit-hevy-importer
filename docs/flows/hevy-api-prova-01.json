@@ -1,0 +1,105 @@
+{
+  "timestamp": "2026-09-02T00:30:26.039294",
+  "base_url": "https://api.hevyapp.com",
+  "total_tests": 4,
+  "successful": 4,
+  "results": [
+    {
+      "endpoint": "/v1/exercise_templates",
+      "method": "GET",
+      "status_code": 200,
+      "success": true,
+      "error": null,
+      "item_count": 100,
+      "sample_item": {
+        "page": "int",
+        "page_count": "int",
+        "exercise_templates": [
+          {
+            "id": "str",
+            "title": "str",
+            "type": "str",
+            "primary_muscle_group": "str",
+            "secondary_muscle_groups": "list",
+            "equipment": "str",
+            "is_custom": "bool"
+          }
+        ]
+      },
+      "headers": {
+        "content-type": "application/json; charset=utf-8"
+      },
+      "timestamp": "2026-09-02T00:30:25.384856"
+    },
+    {
+      "endpoint": "/v1/routine_folders",
+      "method": "GET",
+      "status_code": 200,
+      "success": true,
+      "error": null,
+      "item_count": 2,
+      "sample_item": {
+        "page": "int",
+        "page_count": "int",
+        "routine_folders": [
+          {
+            "id": "int",
+            "index": "int",
+            "title": "str",
+            "updated_at": "str",
+            "created_at": "str"
+          }
+        ]
+      },
+      "headers": {
+        "content-type": "application/json; charset=utf-8"
+      },
+      "timestamp": "2026-09-02T00:30:25.550011"
+    },
+    {
+      "endpoint": "/v1/routines",
+      "method": "GET",
+      "status_code": 200,
+      "success": true,
+      "error": null,
+      "item_count": 9,
+      "sample_item": {
+        "page": "int",
+        "page_count": "int",
+        "routines": [
+          {
+            "id": "str",
+            "title": "str",
+            "folder_id": "int",
+            "updated_at": "str",
+            "created_at": "str",
+            "exercises": "list"
+          }
+        ]
+      },
+      "headers": {
+        "content-type": "application/json; charset=utf-8"
+      },
+      "timestamp": "2026-09-02T00:30:25.875369"
+    },
+    {
+      "endpoint": "/v1/user/info",
+      "method": "GET",
+      "status_code": 200,
+      "success": true,
+      "error": null,
+      "item_count": 0,
+      "sample_item": {
+        "data": {
+          "id": "str",
+          "name": "str",
+          "url": "str"
+        }
+      },
+      "headers": {
+        "content-type": "application/json; charset=utf-8"
+      },
+      "timestamp": "2026-09-02T00:30:26.038042"
+    }
+  ]
+}
