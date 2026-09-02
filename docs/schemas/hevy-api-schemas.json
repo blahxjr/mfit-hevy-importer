@@ -1,0 +1,125 @@
+{
+  "hevy_exercise_template": {
+    "description": "Template de exercício no Hevy (read-only)",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "UUID único do template no Hevy"
+      },
+      "title": {
+        "type": "string",
+        "description": "Nome do exercício no Hevy"
+      },
+      "category": {
+        "type": "string",
+        "enum": ["strength", "cardio", "stretching", "plyometrics"]
+      },
+      "muscle_groups": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Grupos musculares relacionados"
+      },
+      "equipment": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        },
+        "description": "Equipamentos necessários"
+      }
+    },
+    "required": ["id", "title"]
+  },
+  "hevy_folder": {
+    "description": "Pasta/coleção no Hevy",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "UUID da pasta"
+      },
+      "name": {
+        "type": "string"
+      }
+    },
+    "required": ["id", "name"]
+  },
+  "hevy_create_routine_request": {
+    "description": "Request para criar rotina no Hevy",
+    "type": "object",
+    "properties": {
+      "name": {
+        "type": "string"
+      },
+      "folder_id": {
+        "type": "string",
+        "description": "UUID da pasta (opcional)"
+      },
+      "exercises": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "template_id": {
+              "type": "string",
+              "description": "ID do template do exercício"
+            },
+            "notes": {
+              "type": "string"
+            },
+            "sets": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "reps": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "weight": {
+                    "type": "number"
+                  },
+                  "weight_unit": {
+                    "type": "string",
+                    "enum": ["kg", "lb"]
+                  },
+                  "duration": {
+                    "type": "integer",
+                    "description": "Duração em segundos (para exercícios por tempo)"
+                  },
+                  "rest": {
+                    "type": "integer",
+                    "description": "Intervalo em segundos até próximo set"
+                  }
+                }
+              }
+            }
+          },
+          "required": ["template_id"]
+        }
+      }
+    },
+    "required": ["name", "exercises"]
+  },
+  "hevy_routine_response": {
+    "description": "Response ao criar/ler rotina",
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "description": "UUID da rotina criada"
+      },
+      "name": {
+        "type": "string"
+      },
+      "folder_id": {
+        "type": "string"
+      },
+      "exercises": {
+        "type": "array"
+      }
+    }
+  }
+}

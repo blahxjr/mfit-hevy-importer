@@ -1,0 +1,184 @@
+{
+  "mfit_parser_output": {
+    "description": "Saída do MFIT Parser Agent",
+    "type": "object",
+    "properties": {
+      "document": {
+        "type": "object",
+        "properties": {
+          "filename": {
+            "type": "string"
+          },
+          "pages": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "workouts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "source_name": {
+              "type": "string",
+              "description": "Nome da ficha como extraído"
+            },
+            "order": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "exercises": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "source_name": {
+                    "type": "string"
+                  },
+                  "order": {
+                    "type": "integer"
+                  },
+                  "sets_raw": {
+                    "type": "string",
+                    "description": "Número de séries como texto"
+                  },
+                  "reps_raw": {
+                    "type": "string",
+                    "description": "Repetições como texto (ex: '8-12', '30s')"
+                  },
+                  "load_raw": {
+                    "type": "string"
+                  },
+                  "rest_raw": {
+                    "type": "string",
+                    "description": "Intervalo como texto"
+                  },
+                  "notes_raw": {
+                    "type": "string"
+                  },
+                  "techniques": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    },
+                    "description": "Ex: dropset, rest-pause, 8x8, superseries"
+                  },
+                  "group_id": {
+                    "type": ["string", "null"],
+                    "description": "ID de agrupamento se faz parte de super-série"
+                  },
+                  "source_location": {
+                    "type": "string",
+                    "description": "Página e posição no documento"
+                  },
+                  "confidence": {
+                    "type": "number",
+                    "minimum": 0.0,
+                    "maximum": 1.0
+                  },
+                  "warnings": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "warnings": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "normalized_workout": {
+    "description": "Saída do Workout Normalizer Agent",
+    "type": "object",
+    "properties": {
+      "original_workout_name": {
+        "type": "string"
+      },
+      "exercises": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "original_name": {
+              "type": "string"
+            },
+            "sets": {
+              "type": "object",
+              "properties": {
+                "count": {
+                  "type": "integer"
+                },
+                "raw_value": {
+                  "type": "string"
+                }
+              }
+            },
+            "reps": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": ["fixed", "range", "time"]
+                },
+                "min": {
+                  "type": ["integer", "null"]
+                },
+                "max": {
+                  "type": ["integer", "null"]
+                },
+                "seconds": {
+                  "type": ["integer", "null"],
+                  "description": "Para exercícios por tempo"
+                },
+                "raw_value": {
+                  "type": "string"
+                }
+              }
+            },
+            "load": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": ["number", "null"]
+                },
+                "unit": {
+                  "type": "string",
+                  "enum": ["kg", "lb", "none"]
+                },
+                "raw_value": {
+                  "type": "string"
+                }
+              }
+            },
+            "rest_seconds": {
+              "type": ["integer", "null"],
+              "description": "Intervalo em segundos"
+            },
+            "techniques": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "notes": {
+              "type": "string"
+            },
+            "needs_review": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,63 @@
+version: '3.9'
+
+services:
+  # Backend API
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: mfit-hevy-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENV=development
+      - DATABASE_URL=sqlite:///./data/mfit_hevy.db
+      - HEVY_API_BASE_URL=https://api.hevyapp.com
+    volumes:
+      - ./backend:/app
+      - ./data:/app/data
+    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - db
+    networks:
+      - mfit-network
+
+  # Database (PostgreSQL - optional, for production)
+  db:
+    image: postgres:16-alpine
+    container_name: mfit-hevy-db
+    environment:
+      - POSTGRES_USER=mfit_user
+      - POSTGRES_PASSWORD=mfit_password
+      - POSTGRES_DB=mfit_hevy
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mfit-network
+    profiles:
+      - production
+
+  # Frontend (React dev server)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: mfit-hevy-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000
+    networks:
+      - mfit-network
+    profiles:
+      - frontend
+
+volumes:
+  postgres_data:
+
+networks:
+  mfit-network:
+    driver: bridge
