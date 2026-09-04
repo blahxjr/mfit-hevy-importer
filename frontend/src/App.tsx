@@ -2,6 +2,8 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Container, Navbar, Nav } from 'react-bootstrap';
 import './App.css';
+import { ImportsPage } from './pages/ImportsPage';
+import { ReviewPage } from './pages/ReviewPage';
 
 function App() {
   return (
@@ -23,7 +25,8 @@ function App() {
         <Container className="mt-4">
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/imports" element={<Imports />} />
+            <Route path="/imports" element={<ImportsPage />} />
+            <Route path="/review/:importId" element={<ReviewPage />} />
           </Routes>
         </Container>
       </div>
@@ -41,15 +44,6 @@ function Home() {
           Começar Importação
         </a>
       </p>
-    </div>
-  );
-}
-
-function Imports() {
-  return (
-    <div>
-      <h2>Importações</h2>
-      <p>Página de importações - a ser implementada</p>
     </div>
   );
 }
