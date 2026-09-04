@@ -1,15 +1,18 @@
 # Alembic Configuration
 # This is the Alembic configuration file.
 
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
 import os
 import sys
+from logging.config import fileConfig
+
+from sqlalchemy import engine_from_config, pool
+
+from alembic import context
 
 # Add backend to path
-sys.path.insert(0, os.path.dirname(__file__))
+sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+
+from src.domain.models import Base
 
 # this is the Alembic Config object, which provides
 # the values of the [alembic] section of the alembic.ini
@@ -24,8 +27,8 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
-# target_metadata = mymodel.Base.metadata
-target_metadata = None
+target_metadata = Base.metadata
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -37,7 +40,7 @@ def run_migrations_offline() -> None:
     set in an env variable to run app/migrations.
 
     """
-    url = config.get_main_option("sqlalchemy.url")
+    url = os.environ.get("DATABASE_URL", config.get_main_option("sqlalchemy.url"))
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -56,18 +59,12 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    configuration = config.get_section(config.config_ini_section)
-    configuration["sqlalchemy.url"] = os.environ.get(
-        "DATABASE_URL", "sqlite:///./data/mfit_hevy.db"
-    )
-    connectable = engine_from_config(
-        configuration, prefix="sqlalchemy.", poolclass=pool.NullPool
-    )
+    configuration = config.get_section(config.config_ini_section) or {}
+    configuration["sqlalchemy.url"] = os.environ.get("DATABASE_URL", "sqlite:///./data/mfit_hevy.db")
+    connectable = engine_from_config(configuration, prefix="sqlalchemy.", poolclass=pool.NullPool)
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

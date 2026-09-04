@@ -2,10 +2,10 @@
 Pytest configuration and fixtures
 """
 
-import pytest
-from fastapi.testclient import TestClient
-import tempfile
 import os
+import tempfile
+
+import pytest
 
 
 @pytest.fixture
@@ -28,7 +28,10 @@ def test_env(temp_db, monkeypatch):
 @pytest.fixture
 def client(test_env):
     """FastAPI test client"""
+    from fastapi.testclient import TestClient
+
     from src.api.main import app
+
     return TestClient(app)
 
 

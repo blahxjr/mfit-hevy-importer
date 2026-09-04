@@ -2,11 +2,18 @@
 Main FastAPI application
 """
 
-from fastapi import FastAPI, HTTPException, UploadFile, File
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 
+from fastapi import FastAPI, File, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+
+from src.api.routes.catalog import router as catalog_router
+from src.api.routes.imports import router as imports_router
+from src.api.routes.mapping import router as mapping_router
+from src.api.routes.normalize import router as normalize_router
+from src.api.routes.review import router as review_router
+from src.api.routes.write import router as write_router
 from src.infrastructure.config import settings
 from src.schemas.core import ImportState, ImportStatus
 
@@ -38,6 +45,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(catalog_router)
+app.include_router(imports_router)
+app.include_router(normalize_router)
+app.include_router(mapping_router)
+app.include_router(review_router)
+app.include_router(write_router)
 
 
 # Health check
@@ -95,4 +109,5 @@ async def root():
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)

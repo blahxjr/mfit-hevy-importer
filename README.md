@@ -156,6 +156,36 @@ Para usar com a API do Hevy:
    ```
 3. Nunca commitar a chave ou expô-la em logs
 
+## Primeira escrita controlada no Hevy
+
+> **Segurança:** o projeto não cria ou atualiza nenhuma rotina até que o usuário confirme cada mapeamento e todos os valores ambíguos sejam resolvidos.
+
+O fluxo de validação é deliberadamente dividido em etapas:
+
+1. Sincronize o catálogo local com `python scripts/sync_catalog.py`.
+2. Faça parsing, normalização e mapeamento do PDF.
+3. Abra `/review/{importId}` e confirme manualmente cada exercício e suas alternativas.
+4. Para cargas prescritas em percentual (por exemplo, `65-75%`), informe uma carga real em kg/lb antes de liberar a escrita.
+5. Aprove o plano apenas quando a revisão não tiver pendências.
+6. Gere e confira o dry-run com `python scripts/build_payload.py <import_id>`.
+7. Execute **somente uma rotina revisada**, informando sua ordem e a confirmação explícita: `python scripts/execute_plan.py <import_id> <ordem_treino> --confirm-write`. A rotina A tem ordem `0`.
+8. Consulte `POST /write/{import_id}/qa` e valide a rotina criada no Hevy.
+
+O primeiro import local preparado nesta etapa tem ID `b92e4581-0860-4ee7-8ff4-2d88999d1d30`. Ele contém 36 exercícios e permanece com status `parsed`: há 36 mapeamentos a confirmar, 10 sem correspondência automática e cargas percentuais que exigem decisão humana. Portanto, **nenhuma escrita foi realizada**.
+
+## Plano da Fase 2 — OCR de imagens
+
+| Incremento | Objetivo | Critério de aceite |
+|---|---|---|
+| 2.1 — Upload de imagem | Aceitar JPEG, PNG e HEIC com limites de tamanho e checksum | Arquivo validado, armazenado temporariamente e auditável |
+| 2.2 — Extração OCR | Adicionar adaptador para Tesseract local e opção de provedor externo | Texto por página/bloco, confiança por trecho e sem segredos em logs |
+| 2.3 — Pré-processamento | Corrigir rotação, contraste, recorte e ruído | Melhoria mensurável em um conjunto de fichas de teste |
+| 2.4 — Parser unificado | Reutilizar o `MFITParser` para texto de PDF e OCR | Mesmo contrato de `ParsedMfitPDF`, com origem e confiança preservadas |
+| 2.5 — Revisão reforçada | Destacar campos originados por OCR e baixa confiança | Nenhum campo OCR ambíguo é escrito sem confirmação humana |
+| 2.6 — Privacidade e operação | Definir retenção, exclusão e escolha de provedor | Imagens removidas após processamento ou guardadas apenas com consentimento |
+
+O OCR será introduzido atrás de uma interface de adaptador para permitir testes com mocks e evitar acoplamento a um provedor. PDF com texto continuará usando PyMuPDF, pois é mais confiável e barato que OCR.
+
 ## Licença
 
 MIT
