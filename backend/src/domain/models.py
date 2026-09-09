@@ -131,6 +131,42 @@ class SourceExercise(Base):
     normalized: Mapped["NormalizedExercise | None"] = relationship(
         back_populates="source_exercise", cascade="all, delete-orphan", uselist=False
     )
+    canonicalization: Mapped["ExerciseCanonicalization | None"] = relationship(
+        back_populates="source_exercise", cascade="all, delete-orphan", uselist=False
+    )
+
+
+class ExerciseCanonicalization(Base):
+    __tablename__ = "exercise_canonicalizations"
+    __table_args__ = (
+        UniqueConstraint(
+            "source_exercise_id",
+            name="uq_exercise_canonicalizations_source_exercise_id",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    source_exercise_id: Mapped[int] = mapped_column(ForeignKey("source_exercises.id"), nullable=False)
+    source_name_pt: Mapped[str] = mapped_column(String(255), nullable=False)
+    canonical_name_en: Mapped[str | None] = mapped_column(String(255), index=True)
+    search_aliases_en: Mapped[str | None] = mapped_column(Text)
+    movement_pattern: Mapped[str | None] = mapped_column(String(64))
+    equipment_hint: Mapped[str | None] = mapped_column(String(64))
+    primary_muscle_hint: Mapped[str | None] = mapped_column(String(128))
+    secondary_muscles_hint: Mapped[str | None] = mapped_column(Text)
+    confidence: Mapped[float] = mapped_column(Float, nullable=False, default=0.0)
+    needs_review: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    review_reason: Mapped[str | None] = mapped_column(Text)
+    provider: Mapped[str] = mapped_column(String(64), nullable=False, default="external_ai")
+    model_name: Mapped[str | None] = mapped_column(String(128))
+    prompt_version: Mapped[str] = mapped_column(String(32), nullable=False, default="v1")
+    raw_response_sanitized: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now
+    )
+
+    source_exercise: Mapped[SourceExercise] = relationship(back_populates="canonicalization")
 
 
 class NormalizedExercise(Base):

@@ -27,8 +27,21 @@
 
 ## Próximas etapas
 
-1. Criar a tabela `ExerciseCanonicalization`.
-2. Criar o `AIExportAgent`.
-3. Criar o `AIResponseImportAgent`.
-4. Integrar com o `ExerciseMappingAgent`.
-5. Criar a interface de download/upload.
+1. Criar o `AIExportAgent`.
+2. Criar o `AIResponseImportAgent`.
+3. Integrar com o `ExerciseMappingAgent`.
+4. Criar a interface de download/upload.
+
+## Etapa 2 concluída
+
+- Criada a entidade `ExerciseCanonicalization` na tabela `exercise_canonicalizations`.
+- Criada relação 1:1 com `SourceExercise`, com `delete-orphan` para remover o dado derivado junto com o exercício de origem.
+- Persistidos nome original para auditoria, nome canônico, aliases, dicas semânticas, confiança, revisão, provedor, modelo, versão do prompt e resposta sanitizada.
+- Arrays são armazenados como JSON serializado, com helpers seguros que retornam listas vazias para valores nulos ou inválidos.
+- `SourceExercise.source_name`, `NormalizedExercise` e `ExerciseMapping` permanecem preservados e inalterados.
+- Criada migration reversível `20260908_0004_exercise_canonicalizations.py`.
+- Criado `ExerciseCanonicalizationRepository` com buscas por ID, exercício, importação, upsert idempotente e exclusão filtrada.
+- Criados testes unitários para criação, busca, upsert, unicidade, ordenação por importação, serialização, preservação e cascade.
+- Nenhuma IA externa, API Hevy ou endpoint `/write` foi chamado.
+
+**Próximo passo:** criar o `AIExportAgent`.
