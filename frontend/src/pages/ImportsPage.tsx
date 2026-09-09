@@ -297,29 +297,35 @@ export function ImportsPage() {
                 <Alert variant="warning" className="mt-3 mb-0">
                   A IA externa deve devolver somente um JSON válido. A resposta ainda será validada e revisada antes de qualquer mapeamento.
                 </Alert>
-                <hr />
-                <Card.Title>Importar resposta da IA externa</Card.Title>
-                <p>A resposta será validada contra a ficha original. Ela não pode alterar séries, repetições, cargas, intervalos, técnicas, observações ou agrupamentos. Nenhum treino será criado no Hevy nesta etapa.</p>
-                <Form.Group className="mb-3" controlId="external-ai-response">
-                  <Form.Label>Resposta JSON</Form.Label>
-                  <Form.Control type="file" accept="application/json,.json" onChange={selectExternalAiResponse} disabled={externalAiResponseLoading} />
-                  <Form.Text className="text-muted">Somente JSON, até 5 MB.</Form.Text>
-                </Form.Group>
-                {externalAiResponseFile && <Alert variant="secondary" className="py-2"><strong>{externalAiResponseFile.name}</strong> · {(externalAiResponseFile.size / 1024 / 1024).toFixed(2)} MB</Alert>}
-                <Button variant="primary" onClick={() => void importExternalResponse()} disabled={!externalAiResponseFile || externalAiResponseLoading}>
-                  {externalAiResponseLoading ? <><Spinner animation="border" size="sm" className="me-2" />Validando…</> : "Validar e importar resposta da IA"}
-                </Button>
-                {externalAiImportResult && <div className="mt-3">
-                  {externalAiImportResult.status === "imported" ? <>
-                    <Alert variant="success"><strong>Canonicalizações importadas — revisão humana ainda obrigatória</strong></Alert>
-                    <p><strong>Provedor:</strong> {externalAiImportResult.provider ?? "—"}</p>
-                    <p><strong>Aceitos:</strong> {externalAiImportResult.accepted_count} · <strong>Criados:</strong> {externalAiImportResult.created_count} · <strong>Atualizados:</strong> {externalAiImportResult.updated_count} · <strong>Rejeitados:</strong> {externalAiImportResult.rejected_count}</p>
-                    <p><strong>Treinos:</strong> {externalAiImportResult.validation_report.workouts_received}/{externalAiImportResult.validation_report.workouts_expected} · <strong>Exercícios:</strong> {externalAiImportResult.validation_report.exercises_received}/{externalAiImportResult.validation_report.exercises_expected}</p>
-                    <Button variant="outline-secondary" onClick={() => void remapWithCanonicalizations()}>Refazer sugestões de exercícios</Button>
-                  </> : <Alert variant="danger"><strong>Resposta rejeitada.</strong><ul className="mb-0">{externalAiImportResult.validation_report.errors.map((item) => <li key={item}>{item}</li>)}</ul></Alert>}
-                  {!!externalAiImportResult.warnings.length && <Alert variant="warning" className="mt-2">{externalAiImportResult.warnings.join("; ")}</Alert>}
-                </div>}
               </>}
+            </Card.Body>
+          </Card>}
+
+          {importId && <Card className="mt-4">
+            <Card.Body>
+              <Card.Title>Importar resposta da IA externa</Card.Title>
+              <p>A resposta será validada contra a ficha original. Ela não pode alterar séries, repetições, cargas, intervalos, técnicas, observações ou agrupamentos. Nenhum treino será criado no Hevy nesta etapa.</p>
+              <Form.Group className="mb-3" controlId="external-ai-response">
+                <Form.Label>Resposta JSON</Form.Label>
+                <Form.Control type="file" accept="application/json,.json" onChange={selectExternalAiResponse} disabled={externalAiResponseLoading} />
+                <Form.Text className="text-muted">Somente JSON, até 5 MB.</Form.Text>
+              </Form.Group>
+              {externalAiResponseFile && <Alert variant="secondary" className="py-2"><strong>{externalAiResponseFile.name}</strong> · {(externalAiResponseFile.size / 1024 / 1024).toFixed(2)} MB</Alert>}
+              <Button variant="primary" onClick={() => void importExternalResponse()} disabled={!externalAiResponseFile || externalAiResponseLoading}>
+                {externalAiResponseLoading ? <><Spinner animation="border" size="sm" className="me-2" />Validando…</> : "Validar e importar resposta da IA"}
+              </Button>
+              {externalAiImportResult && <div className="mt-3">
+                {externalAiImportResult.status === "imported" ? <>
+                  <Alert variant="success"><strong>Canonicalizações importadas — revisão humana ainda obrigatória</strong></Alert>
+                  <p><strong>Provedor:</strong> {externalAiImportResult.provider ?? "—"}</p>
+                  <p><strong>Aceitos:</strong> {externalAiImportResult.accepted_count} · <strong>Criados:</strong> {externalAiImportResult.created_count} · <strong>Atualizados:</strong> {externalAiImportResult.updated_count} · <strong>Rejeitados:</strong> {externalAiImportResult.rejected_count}</p>
+                  <p><strong>Warnings:</strong> {externalAiImportResult.warnings.length}</p>
+                  <p><strong>Erros:</strong> {externalAiImportResult.validation_report.errors.length}</p>
+                  <p><strong>Treinos:</strong> {externalAiImportResult.validation_report.workouts_received}/{externalAiImportResult.validation_report.workouts_expected} · <strong>Exercícios:</strong> {externalAiImportResult.validation_report.exercises_received}/{externalAiImportResult.validation_report.exercises_expected}</p>
+                  <Button variant="outline-secondary" onClick={() => void remapWithCanonicalizations()}>Refazer sugestões de exercícios</Button>
+                </> : <Alert variant="danger"><strong>Resposta rejeitada.</strong><ul className="mb-0">{externalAiImportResult.validation_report.errors.map((item) => <li key={item}>{item}</li>)}</ul></Alert>}
+                {!!externalAiImportResult.warnings.length && <Alert variant="warning" className="mt-2">{externalAiImportResult.warnings.join("; ")}</Alert>}
+              </div>}
             </Card.Body>
           </Card>}
         </Col>
