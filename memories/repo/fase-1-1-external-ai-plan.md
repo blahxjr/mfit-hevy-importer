@@ -58,3 +58,17 @@
 - Nenhuma IA externa, API Hevy ou endpoint `/write` foi chamado.
 
 **Próximo passo:** criar o `AIResponseImportAgent`.
+
+## Etapa 4 concluída
+
+- Criados schemas Pydantic estritos para respostas de IA externa.
+- Criado o `AIResponseImportAgent` com limite, validação UTF-8/JSON/schema e conferência integral contra o import local.
+- Criados upload `POST /ai-response/import` e relatório `GET /ai-response/{import_id}/validation-report`.
+- Criado o script `backend/scripts/import_ai_response.py`.
+- Respostas válidas persistem somente em `ExerciseCanonicalization`, com `needs_review=True` e upsert idempotente.
+- Inconsistências rejeitam sem persistência parcial; dados MFIT, normalização e mapeamentos permanecem intactos.
+- Adicionada interface de upload, relatório resumido e remapeamento local opcional.
+- Revisão humana continua obrigatória.
+- Nenhuma IA externa, API Hevy, endpoint `/write` ou rotina Hevy foi chamada.
+
+**Próximo passo:** integrar canonicalizações ao `ExerciseMappingAgent`.

@@ -1,8 +1,9 @@
 import { ChangeEvent, useMemo, useState } from "react";
+import axios from "axios";
 import { Alert, Badge, Button, Card, Col, Container, Form, ListGroup, Row, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { downloadExternalAiContext, downloadExternalAiPrompt, generateExternalAiPackage, mapImport, normalizeImport, parseMfitPdf } from "../services/importService";
-import type { ExternalAiPackageResponse, ImportStepStatus, ImportWorkflowState, MapImportResponse, NormalizeImportResponse, ParseImportResponse } from "../types/imports";
+import { downloadExternalAiContext, downloadExternalAiPrompt, generateExternalAiPackage, importExternalAiResponse, mapImport, normalizeImport, parseMfitPdf } from "../services/importService";
+import type { ExternalAiPackageResponse, ExternalAiResponseImportResult, ImportStepStatus, ImportWorkflowState, MapImportResponse, NormalizeImportResponse, ParseImportResponse } from "../types/imports";
 
 const initialSteps: ImportWorkflowState = {
   upload: "pending",
@@ -43,6 +44,9 @@ export function ImportsPage() {
   const [mapResult, setMapResult] = useState<MapImportResponse | null>(null);
   const [externalAiPackage, setExternalAiPackage] = useState<ExternalAiPackageResponse | null>(null);
   const [externalAiLoading, setExternalAiLoading] = useState(false);
+  const [externalAiResponseFile, setExternalAiResponseFile] = useState<File | null>(null);
+  const [externalAiImportResult, setExternalAiImportResult] = useState<ExternalAiResponseImportResult | null>(null);
+  const [externalAiResponseLoading, setExternalAiResponseLoading] = useState(false);
   const [error, setError] = useState("");
 
   const importId = parseResult?.import_id;
@@ -60,6 +64,8 @@ export function ImportsPage() {
     setNormalizeResult(null);
     setMapResult(null);
     setExternalAiPackage(null);
+    setExternalAiResponseFile(null);
+    setExternalAiImportResult(null);
     setSteps(initialSteps);
     if (!selected) {
       setFile(null);
@@ -138,6 +144,52 @@ export function ImportsPage() {
       setError("Não foi possível gerar o pacote para IA externa.");
     } finally {
       setExternalAiLoading(false);
+    }
+  };
+
+  const selectExternalAiResponse = (event: ChangeEvent<HTMLInputElement>) => {
+    const selected = event.target.files?.[0] ?? null;
+    setExternalAiImportResult(null);
+    if (!selected || (!selected.name.toLowerCase().endsWith(".json") && selected.type !== "application/json")) {
+      setExternalAiResponseFile(null);
+      setError("Selecione somente um arquivo JSON de resposta da IA externa.");
+      return;
+    }
+    if (selected.size > 5 * 1024 * 1024) {
+      setExternalAiResponseFile(null);
+      setError("A resposta JSON deve ter no máximo 5 MB.");
+      return;
+    }
+    setError("");
+    setExternalAiResponseFile(selected);
+  };
+
+  const importExternalResponse = async () => {
+    if (!externalAiResponseFile) return;
+    setExternalAiResponseLoading(true);
+    setError("");
+    try {
+      setExternalAiImportResult(await importExternalAiResponse(externalAiResponseFile));
+    } catch (caught) {
+      const detail = axios.isAxiosError(caught) ? caught.response?.data?.detail : null;
+      if (detail && typeof detail === "object" && "status" in detail) {
+        setExternalAiImportResult(detail as ExternalAiResponseImportResult);
+      } else {
+        setError("Não foi possível validar e importar a resposta da IA externa.");
+      }
+    } finally {
+      setExternalAiResponseLoading(false);
+    }
+  };
+
+  const remapWithCanonicalizations = async () => {
+    if (!importId) return;
+    setError("");
+    try {
+      const result = await mapImport(importId);
+      setMapResult(result);
+    } catch {
+      setError("Não foi possível refazer as sugestões de exercícios.");
     }
   };
 
@@ -245,6 +297,28 @@ export function ImportsPage() {
                 <Alert variant="warning" className="mt-3 mb-0">
                   A IA externa deve devolver somente um JSON válido. A resposta ainda será validada e revisada antes de qualquer mapeamento.
                 </Alert>
+                <hr />
+                <Card.Title>Importar resposta da IA externa</Card.Title>
+                <p>A resposta será validada contra a ficha original. Ela não pode alterar séries, repetições, cargas, intervalos, técnicas, observações ou agrupamentos. Nenhum treino será criado no Hevy nesta etapa.</p>
+                <Form.Group className="mb-3" controlId="external-ai-response">
+                  <Form.Label>Resposta JSON</Form.Label>
+                  <Form.Control type="file" accept="application/json,.json" onChange={selectExternalAiResponse} disabled={externalAiResponseLoading} />
+                  <Form.Text className="text-muted">Somente JSON, até 5 MB.</Form.Text>
+                </Form.Group>
+                {externalAiResponseFile && <Alert variant="secondary" className="py-2"><strong>{externalAiResponseFile.name}</strong> · {(externalAiResponseFile.size / 1024 / 1024).toFixed(2)} MB</Alert>}
+                <Button variant="primary" onClick={() => void importExternalResponse()} disabled={!externalAiResponseFile || externalAiResponseLoading}>
+                  {externalAiResponseLoading ? <><Spinner animation="border" size="sm" className="me-2" />Validando…</> : "Validar e importar resposta da IA"}
+                </Button>
+                {externalAiImportResult && <div className="mt-3">
+                  {externalAiImportResult.status === "imported" ? <>
+                    <Alert variant="success"><strong>Canonicalizações importadas — revisão humana ainda obrigatória</strong></Alert>
+                    <p><strong>Provedor:</strong> {externalAiImportResult.provider ?? "—"}</p>
+                    <p><strong>Aceitos:</strong> {externalAiImportResult.accepted_count} · <strong>Criados:</strong> {externalAiImportResult.created_count} · <strong>Atualizados:</strong> {externalAiImportResult.updated_count} · <strong>Rejeitados:</strong> {externalAiImportResult.rejected_count}</p>
+                    <p><strong>Treinos:</strong> {externalAiImportResult.validation_report.workouts_received}/{externalAiImportResult.validation_report.workouts_expected} · <strong>Exercícios:</strong> {externalAiImportResult.validation_report.exercises_received}/{externalAiImportResult.validation_report.exercises_expected}</p>
+                    <Button variant="outline-secondary" onClick={() => void remapWithCanonicalizations()}>Refazer sugestões de exercícios</Button>
+                  </> : <Alert variant="danger"><strong>Resposta rejeitada.</strong><ul className="mb-0">{externalAiImportResult.validation_report.errors.map((item) => <li key={item}>{item}</li>)}</ul></Alert>}
+                  {!!externalAiImportResult.warnings.length && <Alert variant="warning" className="mt-2">{externalAiImportResult.warnings.join("; ")}</Alert>}
+                </div>}
               </>}
             </Card.Body>
           </Card>}

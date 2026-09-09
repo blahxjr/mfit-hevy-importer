@@ -38,6 +38,28 @@ export interface ExternalAiPackageResponse {
   exercises_count: number;
 }
 
+export interface ExternalAiValidationReport {
+  valid: boolean;
+  errors: string[];
+  workouts_expected: number;
+  workouts_received: number;
+  exercises_expected: number;
+  exercises_received: number;
+}
+
+export interface ExternalAiResponseImportResult {
+  import_id: string;
+  status: "imported" | "rejected" | "failed";
+  provider?: string;
+  model_name?: string | null;
+  accepted_count: number;
+  created_count: number;
+  updated_count: number;
+  rejected_count: number;
+  warnings: string[];
+  validation_report: ExternalAiValidationReport;
+}
+
 export type ImportStepStatus = "pending" | "processing" | "done" | "error";
 
 export interface ImportWorkflowState {

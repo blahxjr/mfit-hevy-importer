@@ -189,6 +189,18 @@ O fluxo opcional de IA externa gera localmente um prompt Markdown e um contexto 
 
 O contexto exportado contém apenas os dados MFIT necessários para canonicalização e não inclui API keys, tokens, IDs do Hevy, dados pessoais ou payloads de escrita.
 
+### Importar resposta da IA externa
+
+1. Baixe o prompt e o contexto JSON gerados pelo sistema.
+2. Use-os manualmente em uma IA externa.
+3. Salve somente a resposta JSON válida.
+4. Faça upload da resposta na tela **Importações**.
+5. O sistema valida integralmente a resposta contra a ficha original antes de persistir qualquer canonicalização.
+6. Nenhum mapeamento é confirmado automaticamente.
+7. Após uma importação válida, clique em **Refazer sugestões de exercícios** se desejar executar novamente o matching local.
+8. Revise e confirme manualmente cada sugestão na `ReviewPage`.
+9. Nenhuma rotina é criada no Hevy nesta etapa.
+
 ## Plano da Fase 2 — OCR de imagens
 
 | Incremento | Objetivo | Critério de aceite |

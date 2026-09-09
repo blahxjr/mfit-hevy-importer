@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { ExternalAiPackageResponse, MapImportResponse, NormalizeImportResponse, ParseImportResponse } from "../types/imports";
+import type { ExternalAiPackageResponse, ExternalAiResponseImportResult, MapImportResponse, NormalizeImportResponse, ParseImportResponse } from "../types/imports";
 
 const api = axios.create({
   baseURL: process.env.REACT_APP_API_BASE_URL || "http://127.0.0.1:8000",
@@ -42,4 +42,10 @@ export function downloadExternalAiPrompt(importId: string): Promise<void> {
 
 export function downloadExternalAiContext(importId: string): Promise<void> {
   return downloadExternalAiFile(importId, "context", `mfit_ai_context_${importId}.json`);
+}
+
+export async function importExternalAiResponse(file: File): Promise<ExternalAiResponseImportResult> {
+  const form = new FormData();
+  form.append("file", file);
+  return (await api.post<ExternalAiResponseImportResult>("/ai-response/import", form)).data;
 }

@@ -68,6 +68,7 @@ class ExerciseCanonicalizationRepository(BaseRepository[ExerciseCanonicalization
         model_name: str | None,
         prompt_version: str,
         raw_response_sanitized: str | None,
+        commit: bool = True,
     ) -> ExerciseCanonicalization:
         entity = self.get_by_source_exercise_id(source_exercise_id)
         if entity is None:
@@ -89,8 +90,11 @@ class ExerciseCanonicalizationRepository(BaseRepository[ExerciseCanonicalization
         entity.prompt_version = prompt_version
         entity.raw_response_sanitized = raw_response_sanitized
 
-        self.db.commit()
-        self.db.refresh(entity)
+        if commit:
+            self.db.commit()
+            self.db.refresh(entity)
+        else:
+            self.db.flush()
         return entity
 
     def delete_by_source_exercise_id(self, source_exercise_id: int) -> bool:

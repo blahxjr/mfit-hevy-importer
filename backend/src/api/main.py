@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from src.api.routes.ai_export import router as ai_export_router
+from src.api.routes.ai_response import router as ai_response_router
 from src.api.routes.catalog import router as catalog_router
 from src.api.routes.imports import router as imports_router
 from src.api.routes.mapping import router as mapping_router
@@ -49,6 +50,7 @@ app.add_middleware(
 
 app.include_router(catalog_router)
 app.include_router(ai_export_router)
+app.include_router(ai_response_router)
 app.include_router(imports_router)
 app.include_router(normalize_router)
 app.include_router(mapping_router)
