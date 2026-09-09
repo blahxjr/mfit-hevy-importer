@@ -1,8 +1,8 @@
 import { ChangeEvent, useMemo, useState } from "react";
 import { Alert, Badge, Button, Card, Col, Container, Form, ListGroup, Row, Spinner } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-import { mapImport, normalizeImport, parseMfitPdf } from "../services/importService";
-import type { ImportStepStatus, ImportWorkflowState, MapImportResponse, NormalizeImportResponse, ParseImportResponse } from "../types/imports";
+import { downloadExternalAiContext, downloadExternalAiPrompt, generateExternalAiPackage, mapImport, normalizeImport, parseMfitPdf } from "../services/importService";
+import type { ExternalAiPackageResponse, ImportStepStatus, ImportWorkflowState, MapImportResponse, NormalizeImportResponse, ParseImportResponse } from "../types/imports";
 
 const initialSteps: ImportWorkflowState = {
   upload: "pending",
@@ -41,6 +41,8 @@ export function ImportsPage() {
   const [parseResult, setParseResult] = useState<ParseImportResponse | null>(null);
   const [normalizeResult, setNormalizeResult] = useState<NormalizeImportResponse | null>(null);
   const [mapResult, setMapResult] = useState<MapImportResponse | null>(null);
+  const [externalAiPackage, setExternalAiPackage] = useState<ExternalAiPackageResponse | null>(null);
+  const [externalAiLoading, setExternalAiLoading] = useState(false);
   const [error, setError] = useState("");
 
   const importId = parseResult?.import_id;
@@ -57,6 +59,7 @@ export function ImportsPage() {
     setParseResult(null);
     setNormalizeResult(null);
     setMapResult(null);
+    setExternalAiPackage(null);
     setSteps(initialSteps);
     if (!selected) {
       setFile(null);
@@ -122,6 +125,19 @@ export function ImportsPage() {
     if (importId) {
       setStep("review", "done");
       navigate(`/review/${importId}`);
+    }
+  };
+
+  const generateAiPackage = async () => {
+    if (!importId) return;
+    setError("");
+    setExternalAiLoading(true);
+    try {
+      setExternalAiPackage(await generateExternalAiPackage(importId));
+    } catch {
+      setError("Não foi possível gerar o pacote para IA externa.");
+    } finally {
+      setExternalAiLoading(false);
     }
   };
 
@@ -206,6 +222,30 @@ export function ImportsPage() {
               </Row>
               <hr />
               <Button variant="success" onClick={openReview} disabled={steps.mapping !== "done"}>Abrir revisão dos treinos</Button>
+            </Card.Body>
+          </Card>}
+
+          {mapResult && steps.mapping === "done" && importId && <Card className="mt-4">
+            <Card.Body>
+              <Card.Title>Melhorar sugestões com IA externa (opcional)</Card.Title>
+              <p>
+                O sistema pode gerar um prompt e um contexto JSON para você usar manualmente em ChatGPT, Perplexity, Copilot, Grok, DeepSeek ou outra IA. Nenhuma informação será enviada automaticamente.
+              </p>
+              <Button variant="outline-primary" onClick={() => void generateAiPackage()} disabled={externalAiLoading}>
+                {externalAiLoading ? <><Spinner animation="border" size="sm" className="me-2" />Gerando…</> : "Gerar pacote para IA externa"}
+              </Button>
+              {externalAiPackage && <>
+                <Alert variant="success" className="mt-3">
+                  Pacote gerado com {externalAiPackage.workouts_count} treino(s) e {externalAiPackage.exercises_count} exercício(s).
+                </Alert>
+                <div className="d-flex flex-wrap gap-2">
+                  <Button variant="secondary" onClick={() => void downloadExternalAiPrompt(importId)}>Baixar prompt para IA (.md)</Button>
+                  <Button variant="secondary" onClick={() => void downloadExternalAiContext(importId)}>Baixar contexto do treino (.json)</Button>
+                </div>
+                <Alert variant="warning" className="mt-3 mb-0">
+                  A IA externa deve devolver somente um JSON válido. A resposta ainda será validada e revisada antes de qualquer mapeamento.
+                </Alert>
+              </>}
             </Card.Body>
           </Card>}
         </Col>

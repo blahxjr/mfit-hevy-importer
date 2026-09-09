@@ -26,6 +26,18 @@ export interface MapImportResponse {
   error?: string;
 }
 
+export interface ExternalAiPackageResponse {
+  import_id: string;
+  status: "exported";
+  regenerated: boolean;
+  prompt_filename: string;
+  context_filename: string;
+  prompt_relative_path: string;
+  context_relative_path: string;
+  workouts_count: number;
+  exercises_count: number;
+}
+
 export type ImportStepStatus = "pending" | "processing" | "done" | "error";
 
 export interface ImportWorkflowState {

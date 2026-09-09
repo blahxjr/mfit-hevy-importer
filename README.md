@@ -173,6 +173,22 @@ O fluxo de validação é deliberadamente dividido em etapas:
 
 O primeiro import local preparado nesta etapa tem ID `b92e4581-0860-4ee7-8ff4-2d88999d1d30`. Ele contém 36 exercícios e permanece com status `parsed`: há 36 mapeamentos a confirmar, 10 sem correspondência automática e cargas percentuais que exigem decisão humana. Portanto, **nenhuma escrita foi realizada**.
 
+## Usar IA externa para melhorar sugestões de exercícios
+
+O fluxo opcional de IA externa gera localmente um prompt Markdown e um contexto JSON sanitizado para você usar manualmente com ChatGPT, Perplexity, Copilot, Grok, DeepSeek ou outra IA compatível.
+
+1. Importe o PDF MFIT.
+2. Execute a normalização e o mapeamento local.
+3. Na página de importações, clique em **Gerar pacote para IA externa**.
+4. Baixe o prompt `.md` e o contexto `.json`.
+5. Cole o prompt e anexe ou cole o contexto em uma IA externa.
+6. Solicite que a resposta seja devolvida somente em JSON válido, conforme o schema indicado no prompt.
+7. Salve a resposta JSON localmente.
+8. A importação e validação dessa resposta será implementada na etapa seguinte.
+9. Nada é enviado automaticamente a uma IA e nenhuma rotina é criada no Hevy por esse fluxo.
+
+O contexto exportado contém apenas os dados MFIT necessários para canonicalização e não inclui API keys, tokens, IDs do Hevy, dados pessoais ou payloads de escrita.
+
 ## Plano da Fase 2 — OCR de imagens
 
 | Incremento | Objetivo | Critério de aceite |

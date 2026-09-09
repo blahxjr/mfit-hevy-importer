@@ -45,3 +45,16 @@
 - Nenhuma IA externa, API Hevy ou endpoint `/write` foi chamado.
 
 **Próximo passo:** criar o `AIExportAgent`.
+
+## Etapa 3 concluída
+
+- Criado o `AIExportAgent` para gerar prompt Markdown e contexto JSON sanitizado.
+- Arquivos gerados em `backend/data/exports/<import_id>/`, fora do Git.
+- Criados os endpoints locais `POST /ai-export/{import_id}`, `GET /ai-export/{import_id}/download/prompt` e `GET /ai-export/{import_id}/download/context`.
+- Criado o script `backend/scripts/export_ai_package.py`.
+- Adicionado bloco opcional de geração e download na página de importações.
+- Adicionados testes de agente e rotas para estrutura, segurança, idempotência, traversal, downloads e erros.
+- Exportação não inclui credenciais, dados pessoais, IDs Hevy, mapeamentos ou canonicalizações.
+- Nenhuma IA externa, API Hevy ou endpoint `/write` foi chamado.
+
+**Próximo passo:** criar o `AIResponseImportAgent`.
