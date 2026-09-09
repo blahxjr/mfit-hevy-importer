@@ -16,9 +16,7 @@ services:
     volumes:
       - ./backend:/app
       - ./data:/app/data
-    command: uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload
-    depends_on:
-      - db
+    command: sh -c "alembic upgrade head && uvicorn src.api.main:app --host 0.0.0.0 --port 8000 --reload"
     networks:
       - mfit-network
 
