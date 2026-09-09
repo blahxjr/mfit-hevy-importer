@@ -1,0 +1,274 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mfit-hevy-importer.local/schemas/ai-external-response.schema.json",
+  "title": "MFIT External AI Canonicalization Response",
+  "description": "Resposta JSON sanitizada de uma IA externa com sugestões de canonicalização; não contém IDs do Hevy nem instruções de escrita.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "import_id",
+    "source_filename",
+    "generated_by",
+    "workouts"
+  ],
+  "not": {
+    "anyOf": [
+      { "required": ["template_id"] },
+      { "required": ["hevy_template_id"] },
+      { "required": ["routine_id"] },
+      { "required": ["folder_id"] },
+      { "required": ["api_key"] },
+      { "required": ["token"] },
+      { "required": ["write_action"] },
+      { "required": ["create_routine"] },
+      { "required": ["update_routine"] },
+      { "required": ["delete_routine"] },
+      { "required": ["sets"] },
+      { "required": ["reps"] },
+      { "required": ["weight"] },
+      { "required": ["rest"] },
+      { "required": ["load"] },
+      { "required": ["group_id"] }
+    ]
+  },
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "description": "Versão do contrato da resposta de canonicalização."
+    },
+    "import_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identificador local da importação, que deve corresponder ao contexto enviado."
+    },
+    "source_filename": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Nome do arquivo MFIT de origem, preservado do contexto."
+    },
+    "generated_by": {
+      "$ref": "#/$defs/generated_by",
+      "description": "Identificação não sensível da ferramenta que gerou a resposta."
+    },
+    "workouts": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Treinos com sugestões de canonicalização para seus exercícios.",
+      "items": {
+        "$ref": "#/$defs/workout"
+      }
+    }
+  },
+  "$defs": {
+    "generated_by": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["provider"],
+      "properties": {
+        "provider": {
+          "type": "string",
+          "enum": ["chatgpt", "perplexity", "copilot", "grok", "deepseek", "gemini", "claude", "ollama", "other"],
+          "description": "Provedor ou aplicação externa usada para gerar a resposta."
+        },
+        "model": {
+          "type": "string",
+          "description": "Nome do modelo usado, quando informado pela ferramenta."
+        },
+        "generated_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Data e hora de geração da resposta no formato date-time."
+        }
+      }
+    },
+    "workout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_workout_order",
+        "source_workout_name_pt",
+        "exercises"
+      ],
+      "not": {
+        "anyOf": [
+          { "required": ["template_id"] },
+          { "required": ["hevy_template_id"] },
+          { "required": ["routine_id"] },
+          { "required": ["folder_id"] },
+          { "required": ["api_key"] },
+          { "required": ["token"] },
+          { "required": ["write_action"] },
+          { "required": ["create_routine"] },
+          { "required": ["update_routine"] },
+          { "required": ["delete_routine"] },
+          { "required": ["sets"] },
+          { "required": ["reps"] },
+          { "required": ["weight"] },
+          { "required": ["rest"] },
+          { "required": ["load"] },
+          { "required": ["group_id"] }
+        ]
+      },
+      "properties": {
+        "source_workout_order": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Ordem original do treino; deve ser copiada sem alteração do contexto."
+        },
+        "source_workout_name_pt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Nome original do treino em português; deve ser copiado sem alteração."
+        },
+        "exercises": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Sugestões de canonicalização dos exercícios do treino.",
+          "items": {
+            "$ref": "#/$defs/exercise"
+          }
+        }
+      }
+    },
+    "exercise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_exercise_id",
+        "source_exercise_order",
+        "source_name_pt",
+        "canonical_name_en",
+        "search_aliases_en",
+        "movement_pattern",
+        "equipment_hint",
+        "primary_muscle_hint",
+        "secondary_muscles_hint",
+        "confidence",
+        "needs_review",
+        "review_reason",
+        "notes_for_hevy_search"
+      ],
+      "not": {
+        "anyOf": [
+          { "required": ["template_id"] },
+          { "required": ["hevy_template_id"] },
+          { "required": ["routine_id"] },
+          { "required": ["folder_id"] },
+          { "required": ["api_key"] },
+          { "required": ["token"] },
+          { "required": ["write_action"] },
+          { "required": ["create_routine"] },
+          { "required": ["update_routine"] },
+          { "required": ["delete_routine"] },
+          { "required": ["sets"] },
+          { "required": ["reps"] },
+          { "required": ["weight"] },
+          { "required": ["rest"] },
+          { "required": ["load"] },
+          { "required": ["group_id"] }
+        ]
+      },
+      "properties": {
+        "source_exercise_id": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "Identificador local do exercício de origem; deve ser copiado sem alteração."
+        },
+        "source_exercise_order": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Ordem original do exercício; deve ser copiada sem alteração."
+        },
+        "source_name_pt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Nome original em português; deve ser copiado sem alteração."
+        },
+        "canonical_name_en": {
+          "type": ["string", "null"],
+          "description": "Nome técnico canônico em inglês sugerido para busca textual futura, ou null quando ambíguo."
+        },
+        "search_aliases_en": {
+          "type": "array",
+          "maxItems": 5,
+          "description": "Até cinco aliases técnicos em inglês úteis para busca textual.",
+          "items": { "type": "string" }
+        },
+        "movement_pattern": {
+          "type": ["string", "null"],
+          "enum": ["horizontal_push", "vertical_push", "horizontal_pull", "vertical_pull", "squat", "hip_hinge", "lunge", "knee_extension", "knee_flexion", "calf_raise", "core", "cardio", "mobility", "other", null],
+          "description": "Padrão de movimento sugerido, ou null quando não for possível determinar."
+        },
+        "equipment_hint": {
+          "type": ["string", "null"],
+          "enum": ["barbell", "dumbbell", "cable", "machine", "bodyweight", "smith_machine", "kettlebell", "resistance_band", "plate", "other", null],
+          "description": "Indicação do equipamento explícito ou inferível, sem selecionar um template real."
+        },
+        "primary_muscle_hint": {
+          "type": ["string", "null"],
+          "description": "Sugestão textual do principal grupo muscular, ou null quando ambíguo."
+        },
+        "secondary_muscles_hint": {
+          "type": "array",
+          "maxItems": 8,
+          "description": "Até oito sugestões textuais de grupos musculares secundários.",
+          "items": { "type": "string" }
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Confiança da sugestão entre 0 e 1; não representa confirmação no Hevy."
+        },
+        "needs_review": {
+          "type": "boolean",
+          "description": "Indica se a sugestão exige revisão humana; deve permanecer true por padrão."
+        },
+        "review_reason": {
+          "type": ["string", "null"],
+          "description": "Motivo textual para revisão humana, ou null quando não houver motivo adicional."
+        },
+        "notes_for_hevy_search": {
+          "type": ["string", "null"],
+          "description": "Observações exclusivamente textuais para uma busca futura no catálogo, sem IDs ou ações de escrita."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schema_version": "1.0",
+      "import_id": "local-import-001",
+      "source_filename": "ficha_mfit.pdf",
+      "generated_by": {
+        "provider": "chatgpt",
+        "model": "example-model",
+        "generated_at": "2026-09-08T12:00:00Z"
+      },
+      "workouts": [
+        {
+          "source_workout_order": 0,
+          "source_workout_name_pt": "A - Peito e tríceps",
+          "exercises": [
+            {
+              "source_exercise_id": 101,
+              "source_exercise_order": 0,
+              "source_name_pt": "Supino reto com halteres",
+              "canonical_name_en": "Dumbbell Bench Press",
+              "search_aliases_en": ["Flat Dumbbell Bench Press", "Dumbbell Chest Press"],
+              "movement_pattern": "horizontal_push",
+              "equipment_hint": "dumbbell",
+              "primary_muscle_hint": "pectoralis major",
+              "secondary_muscles_hint": ["triceps", "anterior deltoid"],
+              "confidence": 0.96,
+              "needs_review": true,
+              "review_reason": "A confirmação humana continua obrigatória antes do matching.",
+              "notes_for_hevy_search": "Preservar a indicação de banco reto e halteres na busca."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

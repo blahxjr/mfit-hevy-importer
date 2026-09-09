@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mfit-hevy-importer.local/schemas/ai-external-context.schema.json",
+  "title": "MFIT External AI Context",
+  "description": "Contexto sanitizado que o sistema local exporta para uma IA externa realizar canonicalização de nomes de exercícios.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "import_id",
+    "source_filename",
+    "workouts"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": "1.0",
+      "description": "Versão do contrato do contexto exportado."
+    },
+    "import_id": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Identificador local da importação, sem credenciais ou identificadores remotos do Hevy."
+    },
+    "source_filename": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Nome do arquivo MFIT de origem."
+    },
+    "workouts": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Treinos extraídos do documento MFIT.",
+      "items": {
+        "$ref": "#/$defs/workout"
+      }
+    }
+  },
+  "$defs": {
+    "workout": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_workout_order",
+        "source_workout_name_pt",
+        "exercises"
+      ],
+      "properties": {
+        "source_workout_order": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Ordem original do treino no documento MFIT; não pode ser alterada pela IA."
+        },
+        "source_workout_name_pt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Nome do treino em português conforme extraído do MFIT."
+        },
+        "exercises": {
+          "type": "array",
+          "minItems": 1,
+          "description": "Exercícios pertencentes ao treino.",
+          "items": {
+            "$ref": "#/$defs/exercise"
+          }
+        }
+      }
+    },
+    "exercise": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source_exercise_id",
+        "source_exercise_order",
+        "source_name_pt",
+        "sets_raw",
+        "reps_raw",
+        "load_raw",
+        "rest_raw",
+        "notes_raw",
+        "techniques",
+        "group_id"
+      ],
+      "properties": {
+        "source_exercise_id": {
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "description": "Identificador local positivo do exercício de origem; não é um ID do Hevy."
+        },
+        "source_exercise_order": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Ordem original do exercício dentro do treino; não pode ser alterada pela IA."
+        },
+        "source_name_pt": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Nome original do exercício em português, preservado literalmente."
+        },
+        "sets_raw": {
+          "type": ["string", "null"],
+          "description": "Séries em formato bruto, preservadas sem interpretação ou alteração."
+        },
+        "reps_raw": {
+          "type": ["string", "null"],
+          "description": "Repetições ou duração em formato bruto, preservadas sem alteração."
+        },
+        "load_raw": {
+          "type": ["string", "null"],
+          "description": "Carga, percentual ou indicação de peso em formato bruto, preservada sem conversão."
+        },
+        "rest_raw": {
+          "type": ["string", "null"],
+          "description": "Descanso em formato bruto, preservado sem alteração."
+        },
+        "notes_raw": {
+          "type": ["string", "null"],
+          "description": "Observações originais do MFIT, preservadas sem alteração."
+        },
+        "techniques": {
+          "type": "array",
+          "description": "Técnicas identificadas no documento MFIT, preservadas sem alteração.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "group_id": {
+          "type": ["integer", "null"],
+          "description": "Identificador local do grupo ou super-série; não é um identificador remoto do Hevy."
+        }
+      }
+    }
+  },
+  "examples": [
+    {
+      "schema_version": "1.0",
+      "import_id": "local-import-001",
+      "source_filename": "ficha_mfit.pdf",
+      "workouts": [
+        {
+          "source_workout_order": 0,
+          "source_workout_name_pt": "A - Peito e tríceps",
+          "exercises": [
+            {
+              "source_exercise_id": 101,
+              "source_exercise_order": 0,
+              "source_name_pt": "Supino reto com halteres",
+              "sets_raw": "3 x 8-12",
+              "reps_raw": "8-12",
+              "load_raw": "65%",
+              "rest_raw": "60s",
+              "notes_raw": null,
+              "techniques": [],
+              "group_id": null
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
