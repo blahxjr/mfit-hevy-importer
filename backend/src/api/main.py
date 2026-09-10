@@ -3,10 +3,12 @@ Main FastAPI application
 """
 
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from src.api.routes.ai_export import router as ai_export_router
 from src.api.routes.ai_response import router as ai_response_router
@@ -47,6 +49,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+media_root = Path(__file__).resolve().parents[2] / "data" / "template-media"
+media_root.mkdir(parents=True, exist_ok=True)
+app.mount("/template-media", StaticFiles(directory=str(media_root)), name="template-media")
 
 app.include_router(catalog_router)
 app.include_router(ai_export_router)

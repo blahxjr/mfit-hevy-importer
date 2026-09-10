@@ -78,3 +78,7 @@ htmlcov/
 tmp/
 temp/
 *.tmp
+
+# Resultados temporários de testes frontend
+frontend-jest.json
+jest-results.json

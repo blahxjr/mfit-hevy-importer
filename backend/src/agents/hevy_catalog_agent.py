@@ -1,9 +1,11 @@
 """Sincroniza o catálogo de leitura do Hevy com o cache local."""
 
 import json
+import unicodedata
 from collections.abc import Callable
 from typing import Any
 
+from rapidfuzz import fuzz
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -115,9 +117,32 @@ class HevyCatalogAgent:
     def get_template_by_title(self, title: str) -> ExerciseTemplate | None:
         return self.template_repo.get_by_title(title)
 
-    def search_templates(self, query: str) -> list[ExerciseTemplate]:
-        statement = select(ExerciseTemplate).where(ExerciseTemplate.title.ilike(f"%{query}%"))
-        return list(self.db.scalars(statement.order_by(ExerciseTemplate.title)))
+    @staticmethod
+    def _normalize_search_text(value: str) -> str:
+        normalized = unicodedata.normalize("NFKD", value.lower())
+        return " ".join(
+            "".join(char for char in normalized if not unicodedata.combining(char)).split()
+        )
+
+    def search_templates(self, query: str, limit: int = 20) -> list[ExerciseTemplate]:
+        normalized_query = self._normalize_search_text(query)
+        if not normalized_query:
+            return []
+        candidates = list(self.db.scalars(select(ExerciseTemplate)))
+        ranked: list[tuple[tuple[int, int, float, str], ExerciseTemplate]] = []
+        for template in candidates:
+            normalized_title = self._normalize_search_text(template.title)
+            if normalized_query not in normalized_title:
+                similarity = fuzz.WRatio(normalized_query, normalized_title) / 100
+                if similarity < 0.65:
+                    continue
+                contains_rank = 2
+            else:
+                similarity = fuzz.WRatio(normalized_query, normalized_title) / 100
+                contains_rank = 0 if normalized_title.startswith(normalized_query) else 1
+            ranked.append(((contains_rank, -len(normalized_title), -similarity, template.title.lower()), template))
+        ranked.sort(key=lambda item: item[0])
+        return [template for _, template in ranked[: max(1, min(limit, 100))]]
 
     def get_all_templates(self) -> list[ExerciseTemplate]:
         return self.template_repo.get_all()

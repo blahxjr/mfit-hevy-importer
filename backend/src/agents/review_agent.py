@@ -4,13 +4,17 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from src.domain.models import ExerciseMapping, SourceExercise, SourceWorkout
+from src.repositories.exercise_canonicalization_repository import deserialize_string_list
+from src.repositories.exercise_template_media_repository import ExerciseTemplateMediaRepository
 from src.repositories.import_repository import ImportRepository
+from src.services.exercise_visual_service import ExerciseVisualService
 
 
 class ReviewAgent:
     def __init__(self, db: Session) -> None:
         self.db = db
         self.import_repo = ImportRepository(db)
+        self.media_repo = ExerciseTemplateMediaRepository(db)
 
     def generate_review(self, import_id: str) -> dict:
         imported = self.import_repo.get_by_id(import_id)
@@ -28,6 +32,7 @@ class ReviewAgent:
             exercises = []
             for exercise in sorted(workout.exercises, key=lambda item: item.order):
                 mapping = mappings.get(exercise.source_name)
+                canonicalization = exercise.canonicalization
                 needs_review = mapping is None or not mapping.confirmed_by_user or mapping.template_id is None
                 if mapping:
                     mapped += 1
@@ -35,6 +40,11 @@ class ReviewAgent:
                     pending += 1
                 if mapping is None or mapping.template_id is None:
                     missing += 1
+                template = mapping.template if mapping and mapping.template else None
+                template_visual = ExerciseVisualService.get_visual_descriptor(
+                    template,
+                    self.media_repo.get_by_template_id(template.id) if template else None,
+                )
                 exercises.append(
                     {
                         "source_name": exercise.source_name,
@@ -51,7 +61,15 @@ class ReviewAgent:
                             "method": mapping.method if mapping else None,
                             "confidence": mapping.confidence if mapping else None,
                             "needs_review": needs_review,
+                            "template_visual": template_visual,
                         },
+                        "canonicalization": {
+                            "canonical_name_en": canonicalization.canonical_name_en,
+                            "search_aliases_en": deserialize_string_list(canonicalization.search_aliases_en),
+                            "confidence": canonicalization.confidence,
+                            "provider": canonicalization.provider,
+                            "needs_review": canonicalization.needs_review,
+                        } if canonicalization else None,
                     }
                 )
                 total += 1

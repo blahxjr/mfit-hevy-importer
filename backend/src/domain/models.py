@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 
-from sqlalchemy import Boolean, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Boolean, CheckConstraint, DateTime, Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -31,6 +31,37 @@ class ExerciseTemplate(Base):
     )
 
     mappings: Mapped[list["ExerciseMapping"]] = relationship(back_populates="template")
+    media: Mapped["ExerciseTemplateMedia | None"] = relationship(
+        back_populates="template",
+        uselist=False,
+        cascade="all, delete-orphan",
+    )
+
+
+class ExerciseTemplateMedia(Base):
+    __tablename__ = "exercise_template_media"
+    __table_args__ = (
+        UniqueConstraint("template_id", name="uq_exercise_template_media_template_id"),
+        CheckConstraint(
+            "(source = 'placeholder') OR (image_url IS NOT NULL OR local_file_name IS NOT NULL)",
+            name="ck_exercise_template_media_has_media",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    template_id: Mapped[str] = mapped_column(ForeignKey("exercise_templates.id"), nullable=False, unique=True)
+    source: Mapped[str] = mapped_column(String(32), nullable=False)
+    image_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    local_file_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    alt_text: Mapped[str] = mapped_column(String(255), nullable=False)
+    attribution: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now
+    )
+
+    template: Mapped[ExerciseTemplate] = relationship(back_populates="media")
 
 
 class RoutineFolder(Base):
