@@ -7,7 +7,10 @@ from src.domain.models import ExerciseMapping, SourceExercise, SourceWorkout
 from src.repositories.exercise_canonicalization_repository import deserialize_string_list
 from src.repositories.exercise_template_media_repository import ExerciseTemplateMediaRepository
 from src.repositories.import_repository import ImportRepository
+from src.repositories.workout_exercise_media_repository import WorkoutExerciseMediaRepository
 from src.services.exercise_visual_service import ExerciseVisualService
+from src.services.generic_movement_library_service import GenericMovementLibraryService
+from src.services.workout_exercise_visual_service import WorkoutExerciseVisualService
 
 
 class ReviewAgent:
@@ -15,6 +18,7 @@ class ReviewAgent:
         self.db = db
         self.import_repo = ImportRepository(db)
         self.media_repo = ExerciseTemplateMediaRepository(db)
+        self.workout_media_repo = WorkoutExerciseMediaRepository(db)
 
     def generate_review(self, import_id: str) -> dict:
         imported = self.import_repo.get_by_id(import_id)
@@ -28,6 +32,7 @@ class ReviewAgent:
         ).all()
         mappings = {item.source_name: item for item in self.db.scalars(select(ExerciseMapping)).all()}
         review_workouts, total, mapped, pending, missing = [], 0, 0, 0, 0
+        exercise_index = 0
         for workout in workouts:
             exercises = []
             for exercise in sorted(workout.exercises, key=lambda item: item.order):
@@ -45,8 +50,14 @@ class ReviewAgent:
                     template,
                     self.media_repo.get_by_template_id(template.id) if template else None,
                 )
+                workout_media = self.workout_media_repo.get_by_import_and_index(import_id, exercise_index)
+                generic_media = GenericMovementLibraryService.get_generic_media_for_template(template)
+                workout_visual = WorkoutExerciseVisualService.get_visual_descriptor_for_workout_exercise(
+                    import_id, exercise_index, template, workout_media, generic_media
+                )
                 exercises.append(
                     {
+                        "exercise_index": exercise_index,
                         "source_name": exercise.source_name,
                         "order": exercise.order,
                         "sets_raw": exercise.sets_raw,
@@ -63,6 +74,7 @@ class ReviewAgent:
                             "needs_review": needs_review,
                             "template_visual": template_visual,
                         },
+                        "workout_exercise_visual": workout_visual,
                         "canonicalization": {
                             "canonical_name_en": canonicalization.canonical_name_en,
                             "search_aliases_en": deserialize_string_list(canonicalization.search_aliases_en),
@@ -72,6 +84,7 @@ class ReviewAgent:
                         } if canonicalization else None,
                     }
                 )
+                exercise_index += 1
                 total += 1
             review_workouts.append(
                 {

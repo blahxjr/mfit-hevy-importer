@@ -53,6 +53,12 @@ app.add_middleware(
 media_root = Path(__file__).resolve().parents[2] / "data" / "template-media"
 media_root.mkdir(parents=True, exist_ok=True)
 app.mount("/template-media", StaticFiles(directory=str(media_root)), name="template-media")
+generic_media_root = Path(__file__).resolve().parents[2] / "data" / "generic-movement-library"
+generic_media_root.mkdir(parents=True, exist_ok=True)
+app.mount("/static/generic-movement-library", StaticFiles(directory=str(generic_media_root)), name="generic-movement-library")
+imports_media_root = Path(__file__).resolve().parents[2] / "data" / "imports"
+imports_media_root.mkdir(parents=True, exist_ok=True)
+app.mount("/static/imports", StaticFiles(directory=str(imports_media_root)), name="imports-media")
 
 app.include_router(catalog_router)
 app.include_router(ai_export_router)

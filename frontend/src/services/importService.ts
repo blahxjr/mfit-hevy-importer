@@ -98,3 +98,27 @@ export function uploadTemplateMedia(
   form.append("is_verified", String(isVerified));
   return api.post<Record<string, unknown>>(`/catalog/templates/${encodeURIComponent(templateId)}/media/upload`, form).then((response) => response.data);
 }
+
+export function uploadWorkoutExerciseMedia(
+  importId: string,
+  exerciseIndex: number,
+  file: File,
+  altText: string,
+  isVerified = false,
+): Promise<Record<string, unknown>> {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("alt_text", altText);
+  form.append("source", "local_manual");
+  form.append("is_verified", String(isVerified));
+  return api.post<Record<string, unknown>>(`/imports/${encodeURIComponent(importId)}/exercises/${exerciseIndex}/media/upload`, form).then((response) => response.data);
+}
+
+export function updateWorkoutExerciseMedia(
+  importId: string,
+  exerciseIndex: number,
+  altText: string,
+  isVerified: boolean,
+): Promise<Record<string, unknown>> {
+  return api.put<Record<string, unknown>>(`/imports/${encodeURIComponent(importId)}/exercises/${exerciseIndex}/media`, { alt_text: altText, is_verified: isVerified }).then((response) => response.data);
+}

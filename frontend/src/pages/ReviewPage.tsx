@@ -12,6 +12,8 @@ import {
 } from "../services/importService";
 import type { HevyTemplateSearchResult, ReviewAlternative, ReviewExercise, ReviewResponse, ReviewWorkout, TemplateVisualDescriptor } from "../types/imports";
 import { ExerciseVisualCard } from "../components/ExerciseVisualCard";
+import { MfitPdfViewer } from "../components/MfitPdfViewer";
+import { WorkoutExerciseImageEditor } from "../components/WorkoutExerciseImageEditor";
 
 type AlternativeState = {
   items: ReviewAlternative[];
@@ -57,6 +59,23 @@ function placeholderVisualFromTemplate(template: Pick<HevyTemplateSearchResult, 
     muscle_label: template.primary_muscle_group ?? null,
     equipment_label: template.equipment ?? null,
     is_verified: false,
+  };
+}
+
+function placeholderWorkoutVisual(importId: string, exerciseIndex: number, title: string) {
+  return {
+    import_id: importId,
+    exercise_index: exerciseIndex,
+    template_id: null,
+    kind: "placeholder" as const,
+    image_url: null,
+    local_image_url: null,
+    alt_text: `Imagem de referência para ${title}`,
+    movement_icon: "bi-card-image",
+    muscle_label: null,
+    equipment_label: null,
+    is_verified: false,
+    source: "none" as const,
   };
 }
 
@@ -251,6 +270,7 @@ export function ReviewPage() {
           </div>
         </Card.Body>
       </Card>
+      {importId && <Card className="mb-4"><Card.Body><MfitPdfViewer importId={importId} /></Card.Body></Card>}
 
       {review.workouts.length === 0 ? (
         <Alert variant="info">Não há treinos nesta importação.</Alert>
@@ -264,6 +284,7 @@ export function ReviewPage() {
             {workout.exercises.map((exercise) => {
               const key = exerciseKey(workout, exercise);
               const alternativeState = alternatives[key];
+              const workoutVisual = exercise.workout_exercise_visual ?? placeholderWorkoutVisual(importId ?? review.import_id, exercise.exercise_index ?? exercise.order, exercise.source_name);
               return (
                 <div className="border rounded p-3 mb-3" key={key}>
                   <div className="d-flex justify-content-between align-items-start">
@@ -308,6 +329,14 @@ export function ReviewPage() {
                       <div className="mt-2 small text-muted">A imagem é somente referência visual e não confirma o mapeamento.</div>
                     </div>
                   )}
+                  <WorkoutExerciseImageEditor
+                    importId={importId ?? review.import_id}
+                    exerciseIndex={workoutVisual.exercise_index}
+                    visual={workoutVisual}
+                    onMediaUpdated={() => {
+                      if (importId) void getReview(importId).then(setReview);
+                    }}
+                  />
                   {exercise.canonicalization && <div className="mt-2">
                     <Badge bg="info" className="me-2">IA: {exercise.canonicalization.canonical_name_en || "Sem nome canônico"}</Badge>
                     <Badge bg="warning" className="me-2">Revisão humana obrigatória</Badge>

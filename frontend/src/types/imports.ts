@@ -44,6 +44,21 @@ export interface TemplateVisualDescriptor {
   is_verified: boolean;
 }
 
+export interface WorkoutExerciseVisualDescriptor {
+  import_id: string;
+  exercise_index: number;
+  template_id: string | null;
+  kind: "local_image" | "generic_image" | "placeholder";
+  image_url: string | null;
+  local_image_url: string | null;
+  alt_text: string;
+  movement_icon: string;
+  muscle_label: string | null;
+  equipment_label: string | null;
+  is_verified: boolean;
+  source: "local_manual" | "generic_library" | "none";
+}
+
 export interface ReviewMapping {
   mapping_id: number | null;
   template_id: string | null;
@@ -65,6 +80,7 @@ export interface ReviewCanonicalization {
 export interface ReviewExercise {
   source_name: string;
   order: number;
+  exercise_index: number;
   sets_raw: string | null;
   reps_raw: string | null;
   load_raw: string | null;
@@ -72,6 +88,7 @@ export interface ReviewExercise {
   techniques: string | null;
   mapping: ReviewMapping;
   canonicalization?: ReviewCanonicalization | null;
+  workout_exercise_visual: WorkoutExerciseVisualDescriptor;
 }
 
 export interface HevyTemplateSearchResult {

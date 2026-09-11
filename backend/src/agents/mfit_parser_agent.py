@@ -29,6 +29,9 @@ class MFITParserAgent:
         parsed = MFITParser(pdf_path).parse()
         imported = Import(id=str(uuid.uuid4()), filename=parsed.filename, sha256=file_hash, status="parsed")
         self.db.add(imported)
+        import_dir = Path(__file__).resolve().parents[2] / "data" / "imports" / imported.id
+        import_dir.mkdir(parents=True, exist_ok=True)
+        (import_dir / "original.pdf").write_bytes(Path(pdf_path).read_bytes())
         workouts_count = exercises_count = 0
         for workout in parsed.workouts:
             persisted = SourceWorkout(import_ref=imported, source_name=workout.source_name, order=workout.order)

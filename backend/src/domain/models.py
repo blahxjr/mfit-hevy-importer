@@ -126,6 +126,37 @@ class Import(Base):
 
     workouts: Mapped[list["SourceWorkout"]] = relationship(back_populates="import_ref", cascade="all, delete-orphan")
     audit_events: Mapped[list["AuditEvent"]] = relationship(back_populates="import_ref", cascade="all, delete-orphan")
+    exercise_media: Mapped[list["WorkoutExerciseMedia"]] = relationship(
+        back_populates="import_ref", cascade="all, delete-orphan"
+    )
+
+
+class WorkoutExerciseMedia(Base):
+    __tablename__ = "workout_exercise_media"
+    __table_args__ = (
+        UniqueConstraint("import_id", "exercise_index", name="uq_workout_exercise_media_import_index"),
+        CheckConstraint(
+            "(source = 'placeholder') OR (image_url IS NOT NULL OR local_file_name IS NOT NULL)",
+            name="ck_workout_exercise_media_has_media",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    import_id: Mapped[str] = mapped_column(ForeignKey("imports.id"), nullable=False)
+    exercise_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    template_id: Mapped[str | None] = mapped_column(ForeignKey("exercise_templates.id"), nullable=True)
+    source: Mapped[str] = mapped_column(String(32), nullable=False)
+    image_url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    local_file_name: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    alt_text: Mapped[str] = mapped_column(String(255), nullable=False)
+    is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now
+    )
+
+    import_ref: Mapped[Import] = relationship(back_populates="exercise_media")
+    template: Mapped[ExerciseTemplate | None] = relationship()
 
 
 class SourceWorkout(Base):
