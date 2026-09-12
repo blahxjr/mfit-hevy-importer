@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     hevy_api_key: str = ""
     hevy_api_timeout: int = 30
 
+    # ExerciseDB API (optional until explicitly configured)
+    exercisedb_api_base_url: str = "https://api.exercisedb.dev"
+    exercisedb_api_key: str = ""
+    exercisedb_api_timeout: int = 30
+
     # Logging
     log_level: str = "INFO"
 

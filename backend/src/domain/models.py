@@ -38,6 +38,31 @@ class ExerciseTemplate(Base):
     )
 
 
+class Exercise(Base):
+    """Exercício do catálogo próprio, independente do catálogo Hevy."""
+
+    __tablename__ = "exercises"
+    __table_args__ = (UniqueConstraint("exercisedb_id", name="uq_exercises_exercisedb_id"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    exercisedb_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    hevy_template_id: Mapped[str | None] = mapped_column(ForeignKey("exercise_templates.id"), nullable=True, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    name_en: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    body_part: Mapped[str | None] = mapped_column(String(128))
+    target_muscle: Mapped[str | None] = mapped_column(String(128))
+    secondary_muscles: Mapped[str | None] = mapped_column(Text)
+    equipment: Mapped[str | None] = mapped_column(String(128))
+    movement_pattern: Mapped[str | None] = mapped_column(String(64), index=True)
+    instructions: Mapped[str | None] = mapped_column(Text)
+    image_url: Mapped[str | None] = mapped_column(String(2048))
+    video_url: Mapped[str | None] = mapped_column(String(2048))
+    media_hint: Mapped[str | None] = mapped_column(String(32))
+    source: Mapped[str] = mapped_column(String(32), nullable=False, default="exercisedb", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+
+
 class ExerciseTemplateMedia(Base):
     __tablename__ = "exercise_template_media"
     __table_args__ = (

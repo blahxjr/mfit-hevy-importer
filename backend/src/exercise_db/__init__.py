@@ -1,0 +1,1 @@
+"""Integração somente leitura com a ExerciseDB."""

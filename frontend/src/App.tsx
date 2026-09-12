@@ -4,6 +4,8 @@ import { Container, Navbar, Nav } from 'react-bootstrap';
 import './App.css';
 import { ImportsPage } from './pages/ImportsPage';
 import { ReviewPage } from './pages/ReviewPage';
+import { ExercisesCatalogPage } from './pages/ExercisesCatalogPage';
+import { ExerciseDetailsPage } from './pages/ExerciseDetailsPage';
 
 function App() {
   return (
@@ -17,6 +19,7 @@ function App() {
               <Nav className="ms-auto">
                 <Nav.Link href="/">Home</Nav.Link>
                 <Nav.Link href="/imports">Importações</Nav.Link>
+                <Nav.Link href="/exercises">Exercícios</Nav.Link>
               </Nav>
             </Navbar.Collapse>
           </Container>
@@ -27,6 +30,8 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/imports" element={<ImportsPage />} />
             <Route path="/review/:importId" element={<ReviewPage />} />
+            <Route path="/exercises" element={<ExercisesCatalogPage />} />
+            <Route path="/exercises/:exerciseId" element={<ExerciseDetailsPage />} />
           </Routes>
         </Container>
       </div>
