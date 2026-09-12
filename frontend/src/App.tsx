@@ -6,6 +6,8 @@ import { ImportsPage } from './pages/ImportsPage';
 import { ReviewPage } from './pages/ReviewPage';
 import { ExercisesCatalogPage } from './pages/ExercisesCatalogPage';
 import { ExerciseDetailsPage } from './pages/ExerciseDetailsPage';
+import { WorkoutsPage } from './pages/WorkoutsPage';
+import { WorkoutExecutionPage } from './pages/WorkoutExecutionPage';
 
 function App() {
   return (
@@ -20,6 +22,7 @@ function App() {
                 <Nav.Link href="/">Home</Nav.Link>
                 <Nav.Link href="/imports">Importações</Nav.Link>
                 <Nav.Link href="/exercises">Exercícios</Nav.Link>
+                <Nav.Link href="/workouts">Treinos</Nav.Link>
               </Nav>
             </Navbar.Collapse>
           </Container>
@@ -32,6 +35,8 @@ function App() {
             <Route path="/review/:importId" element={<ReviewPage />} />
             <Route path="/exercises" element={<ExercisesCatalogPage />} />
             <Route path="/exercises/:exerciseId" element={<ExerciseDetailsPage />} />
+            <Route path="/workouts" element={<WorkoutsPage />} />
+            <Route path="/workouts/:workoutId" element={<WorkoutExecutionPage />} />
           </Routes>
         </Container>
       </div>

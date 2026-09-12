@@ -154,6 +154,70 @@ class Import(Base):
     exercise_media: Mapped[list["WorkoutExerciseMedia"]] = relationship(
         back_populates="import_ref", cascade="all, delete-orphan"
     )
+    local_workouts: Mapped[list["Workout"]] = relationship(back_populates="import_ref")
+
+
+class Workout(Base):
+    """Treino executável localmente, sem dependência de escrita no Hevy."""
+
+    __tablename__ = "local_workouts"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    import_id: Mapped[str | None] = mapped_column(ForeignKey("imports.id"), nullable=True, index=True)
+    hevy_workout_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    hevy_routine_id: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    date: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, index=True)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="planned", index=True)
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+
+    import_ref: Mapped[Import | None] = relationship(back_populates="local_workouts")
+    exercises: Mapped[list["WorkoutExercise"]] = relationship(
+        back_populates="workout", cascade="all, delete-orphan", order_by="WorkoutExercise.sequence_index"
+    )
+
+
+class WorkoutExercise(Base):
+    __tablename__ = "workout_exercises"
+    __table_args__ = (UniqueConstraint("workout_id", "sequence_index", name="uq_workout_exercise_sequence"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    workout_id: Mapped[str] = mapped_column(ForeignKey("local_workouts.id", ondelete="CASCADE"), nullable=False, index=True)
+    exercise_id: Mapped[str] = mapped_column(ForeignKey("exercises.id"), nullable=False, index=True)
+    sequence_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    planned_sets: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
+    planned_reps: Mapped[int | None] = mapped_column(Integer)
+    planned_load: Mapped[str | None] = mapped_column(String(64))
+    planned_time_seconds: Mapped[int | None] = mapped_column(Integer)
+    planned_distance_meters: Mapped[int | None] = mapped_column(Integer)
+    notes: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=utc_now, onupdate=utc_now)
+
+    workout: Mapped[Workout] = relationship(back_populates="exercises")
+    exercise: Mapped[Exercise] = relationship()
+    set_logs: Mapped[list["WorkoutSetLog"]] = relationship(
+        back_populates="workout_exercise", cascade="all, delete-orphan", order_by="WorkoutSetLog.set_index"
+    )
+
+
+class WorkoutSetLog(Base):
+    __tablename__ = "workout_set_logs"
+    __table_args__ = (UniqueConstraint("workout_exercise_id", "set_index", name="uq_workout_set_log_index"),)
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    workout_exercise_id: Mapped[str] = mapped_column(ForeignKey("workout_exercises.id", ondelete="CASCADE"), nullable=False, index=True)
+    set_index: Mapped[int] = mapped_column(Integer, nullable=False)
+    actual_reps: Mapped[int | None] = mapped_column(Integer)
+    actual_load: Mapped[str | None] = mapped_column(String(64))
+    actual_time_seconds: Mapped[int | None] = mapped_column(Integer)
+    actual_distance_meters: Mapped[int | None] = mapped_column(Integer)
+    rpe: Mapped[int | None] = mapped_column(Integer)
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+    workout_exercise: Mapped[WorkoutExercise] = relationship(back_populates="set_logs")
 
 
 class WorkoutExerciseMedia(Base):

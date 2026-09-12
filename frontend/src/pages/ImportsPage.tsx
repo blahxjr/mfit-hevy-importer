@@ -4,6 +4,7 @@ import { Alert, Badge, Button, Card, Col, Container, Form, ListGroup, Row, Spinn
 import { useNavigate } from "react-router-dom";
 import { downloadExternalAiContext, downloadExternalAiPrompt, generateExternalAiPackage, importExternalAiResponse, mapImport, normalizeImport, parseMfitPdf } from "../services/importService";
 import type { ExternalAiPackageResponse, ExternalAiResponseImportResult, ImportStepStatus, ImportWorkflowState, MapImportResponse, NormalizeImportResponse, ParseImportResponse } from "../types/imports";
+import { createWorkoutFromImport } from "../services/workoutEngineService";
 
 const initialSteps: ImportWorkflowState = {
   upload: "pending",
@@ -48,6 +49,7 @@ export function ImportsPage() {
   const [externalAiImportResult, setExternalAiImportResult] = useState<ExternalAiResponseImportResult | null>(null);
   const [externalAiResponseLoading, setExternalAiResponseLoading] = useState(false);
   const [error, setError] = useState("");
+  const [localWorkoutLoading, setLocalWorkoutLoading] = useState(false);
 
   const importId = parseResult?.import_id;
   const shortHash = useMemo(() => parseResult?.sha256 ? `${parseResult.sha256.slice(0, 12)}…` : "", [parseResult]);
@@ -193,6 +195,20 @@ export function ImportsPage() {
     }
   };
 
+  const createLocalWorkout = async () => {
+    if (!importId) return;
+    setLocalWorkoutLoading(true);
+    setError("");
+    try {
+      const workout = await createWorkoutFromImport(importId);
+      navigate(`/workouts/${workout.id}`);
+    } catch {
+      setError("Não foi possível criar o treino local a partir deste import.");
+    } finally {
+      setLocalWorkoutLoading(false);
+    }
+  };
+
   const processing = steps.parsing === "processing" || steps.normalization === "processing" || steps.mapping === "processing";
 
   return (
@@ -274,6 +290,9 @@ export function ImportsPage() {
               </Row>
               <hr />
               <Button variant="success" onClick={openReview} disabled={steps.mapping !== "done"}>Abrir revisão dos treinos</Button>
+              <Button variant="outline-success" className="ms-2" onClick={() => void createLocalWorkout()} disabled={localWorkoutLoading || steps.mapping !== "done"}>
+                {localWorkoutLoading ? <><Spinner animation="border" size="sm" className="me-2" />Criando…</> : "Criar treino MagicMusculo"}
+              </Button>
             </Card.Body>
           </Card>}
 

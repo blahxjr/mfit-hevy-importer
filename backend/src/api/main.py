@@ -14,6 +14,7 @@ from src.api.routes.ai_export import router as ai_export_router
 from src.api.routes.ai_response import router as ai_response_router
 from src.api.routes.catalog import router as catalog_router
 from src.api.routes.exercises import router as exercises_router
+from src.api.routes.workouts import router as workouts_router
 from src.api.routes.imports import router as imports_router
 from src.api.routes.mapping import router as mapping_router
 from src.api.routes.normalize import router as normalize_router
@@ -63,6 +64,7 @@ app.mount("/static/imports", StaticFiles(directory=str(imports_media_root)), nam
 
 app.include_router(catalog_router)
 app.include_router(exercises_router)
+app.include_router(workouts_router)
 app.include_router(ai_export_router)
 app.include_router(ai_response_router)
 app.include_router(imports_router)
