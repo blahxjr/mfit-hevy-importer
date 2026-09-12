@@ -1,12 +1,13 @@
 """Regras de domínio para planejar e executar treinos localmente."""
 
+import json
 import re
 from datetime import datetime, timezone
 
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from src.domain.models import Exercise, Import, Routine, SourceWorkout, Workout
+from src.domain.models import Exercise, ExerciseTemplate, Import, Routine, SourceWorkout, Workout
 from src.repositories.exercise_repository import ExerciseRepository, normalize_name
 from src.repositories.workout_exercise_repository import WorkoutExerciseRepository
 from src.repositories.workout_repository import WorkoutRepository
@@ -69,6 +70,26 @@ class WorkoutEngineService:
         if routine is None:
             raise ValueError("Routine not found")
         workout = self.workouts.create_planned_workout(None, routine.title, datetime.now(timezone.utc), hevy_routine_id=routine.id)
+        plan = json.loads(routine.exercise_plan or "[]")
+        for index, planned in enumerate(plan):
+            if not isinstance(planned, dict):
+                continue
+            template_id = planned.get("template_id")
+            exercise = self.db.scalar(select(Exercise).where(Exercise.hevy_template_id == str(template_id))) if template_id else None
+            if exercise is None and template_id:
+                template = self.db.get(ExerciseTemplate, str(template_id))
+                if template is not None:
+                    exercise = self._resolve_catalog_exercise(template.title)
+                    exercise.hevy_template_id = template.id
+            if exercise is None:
+                continue
+            sets = planned.get("sets") if isinstance(planned.get("sets"), list) else []
+            first_set = sets[0] if sets and isinstance(sets[0], dict) else {}
+            self.exercises.add_exercise_to_workout(
+                workout.id, exercise.id, sequence_index=index,
+                planned_sets=max(len(sets), 1), planned_reps=first_set.get("reps"),
+                planned_load=first_set.get("weight"), notes=planned.get("notes"),
+            )
         self.db.commit()
         return self.workouts.get_by_id(workout.id)  # type: ignore[return-value]
 

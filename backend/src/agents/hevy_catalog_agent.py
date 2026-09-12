@@ -113,6 +113,8 @@ class HevyCatalogAgent:
             self.db.add(routine)
         routine.title = str(data["title"])
         routine.folder_id = data.get("folder_id")
+        exercises = data.get("exercises")
+        routine.exercise_plan = json.dumps(exercises, ensure_ascii=False) if isinstance(exercises, list) else None
 
     def get_template_by_title(self, title: str) -> ExerciseTemplate | None:
         return self.template_repo.get_by_title(title)

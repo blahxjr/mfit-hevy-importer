@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from src.domain.models import Base, Exercise, Import, Routine, SourceExercise, SourceWorkout
+from src.domain.models import Base, Exercise, ExerciseTemplate, Import, Routine, SourceExercise, SourceWorkout
 from src.services.workout_engine_service import WorkoutEngineService
 
 
@@ -58,9 +58,13 @@ def test_transitions_and_manual_exercise():
 
 def test_create_from_hevy_routine_is_local_only():
     db = setup_db()
-    db.add(Routine(id="routine-1", title="Upper body"))
+    db.add_all([Routine(id="routine-1", title="Upper body", exercise_plan='[{"template_id": "template-1", "sets": [{"reps": 8, "weight": 20}], "notes": "Controlado"}]'), ExerciseTemplate(id="template-1", title="Bench Press")])
+    db.flush()
+    db.add(Exercise(id="exercise-1", name="Bench Press", source="exercisedb", hevy_template_id="template-1"))
     db.commit()
     workout = WorkoutEngineService(db).create_from_hevy_routine("routine-1")
     assert workout.hevy_routine_id == "routine-1"
     assert workout.import_id is None
     assert workout.status == "planned"
+    assert len(workout.exercises) == 1
+    assert workout.exercises[0].planned_reps == 8
